@@ -177,7 +177,7 @@ Note that you do not have to opt-in for automatic upgrades for the non-Docker se
 
 ## Deployment
 
-How you deploy the Graphite server will depend on which builder you've selected. These simple instructions assume you're already familiar with AWS and/or Docker.  For information about how to get started with these resources, consult their online documentation.
+How you deploy the Graphite server will depend on which builder you've selected. These simple instructions assume you're already familiar with AWS, Digital Ocean and/or Docker.  For information about how to get started with these resources, consult their online documentation.  Once your Fedora server has been started, Fedora can be accessed through a Web browser at /fcrepo4.
 
 ### AWS EC2 Instance
 
