@@ -13,8 +13,8 @@
 {
   "variables": {
     /* Below variables are hard-coded for this project */
-    "fcrepo4_version": "4.0.0",
-    "packer_fcrepo4_version": "0.1.0",
+    "fcrepo4_version": "4.1.0",
+    "packer_fcrepo4_version": "0.1.1",
     /* The build script will overwrite below var if building from a forked repo */
     "packer_project_repo": "http://github.com/ksclarke/packer-fcrepo4",
     /* Below builder variables should be supplied by the vars.json file */

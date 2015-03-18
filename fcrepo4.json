@@ -3,8 +3,8 @@
 {
   "variables": {
     
-    "fcrepo4_version": "4.0.0",
-    "packer_fcrepo4_version": "0.1.0",
+    "fcrepo4_version": "4.1.0",
+    "packer_fcrepo4_version": "0.1.1",
     
     "packer_project_repo": "http://github.com/ksclarke/packer-fcrepo4",
     
