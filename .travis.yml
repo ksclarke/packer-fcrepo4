@@ -1,0 +1,60 @@
+language: python
+
+branches:
+  except:
+   - documentation
+
+matrix:
+  fast_finish: true
+
+env:
+  matrix:
+   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=true
+   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=false
+   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="m3.medium" AWS_VIRTUALIZATION_TYPE="pv" AWS_SOURCE_AMI="ami-0870c460" IP_INDEX=16 STRIP_COMMENTS=true
+  global:
+   # Secure variables: AWS_SECRET_KEY, AWS_ACCESS_KEY, AWS_SECURITY_GROUP_ID, AWS_OWNER_ID, AWS_SECURITY_GROUP, AWS_KEYPAIR_NAME, DIGITALOCEAN_API_TOKEN
+   - AWS_REGION="us-east-1"
+   - DEFAULT_SSH_USER="ubuntu"
+   - PACKER_GRAPHITE_BUILD_NAME="travis-packer"
+   - PACKER_GRAPHITE_EMAIL="ksclarke@gmail.com"
+
+before_install:
+ - sudo apt-get update -y --fix-missing
+
+install:
+ # Install Packer.io so we can run the build
+ - curl -o /tmp/packer.zip -L "https://dl.bintray.com/mitchellh/packer/packer_${PACKER_VERSION}_linux_amd64.zip"
+ - sudo unzip -d /usr/local/bin /tmp/packer.zip
+ # Install some basic testing dependencies
+ - sudo apt-get -y install wget
+ # Install dependencies for our project's build script
+ - sudo apt-get -y install npm
+ - if [ "$STRIP_COMMENTS" = true ]; then npm install --save strip-json-comments; fi
+
+before_script:
+ # Install the necessary pre-test AWS stuff, if needed
+ - if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-before.sh; fi
+ # Keep the project's build script happy by supplying a default config file
+ - cp example-vars.json vars.json
+
+script:
+ # Run the packer build script to create an AWS AMI
+ - if [ "$PACKER_TEST" = "AWS" ]; then ./build.sh amazon-ebs; fi
+
+after_script:
+ - if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-after.sh; fi
+ - aws ec2 revoke-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 2003 --cidr $(cat travis.ip)/32
+ - rm -f ~/.aws/config
+
+notifications:
+  email:
+    recipients:
+      - ksclarke@gmail.com
+    on_failure: change
+    on_success: change
+  irc:
+    channels:
+      - irc.freenode.org#freelibrary
+    on_failure: always
+    on_success: always
