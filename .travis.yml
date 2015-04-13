@@ -1,60 +1,65 @@
-language: python
+language: java
+
+jdk:
+- openjdk7
+- oraclejdk7
 
 branches:
   except:
-   - documentation
+  - documentation
 
 matrix:
   fast_finish: true
 
 env:
   matrix:
-   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=true
-   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=false
-   - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="m3.medium" AWS_VIRTUALIZATION_TYPE="pv" AWS_SOURCE_AMI="ami-0870c460" IP_INDEX=16 STRIP_COMMENTS=true
+  - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=true
+  - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="t2.medium" AWS_VIRTUALIZATION_TYPE="hvm" AWS_SOURCE_AMI="ami-0070c468" IP_INDEX=15 STRIP_COMMENTS=false
+  - PACKER_VERSION="0.7.1" PACKER_TEST=AWS AWS_INSTANCE_TYPE="m3.medium" AWS_VIRTUALIZATION_TYPE="pv" AWS_SOURCE_AMI="ami-0870c460" IP_INDEX=16 STRIP_COMMENTS=true
+
   global:
-   # Secure variables: AWS_SECRET_KEY, AWS_ACCESS_KEY, AWS_SECURITY_GROUP_ID, AWS_OWNER_ID, AWS_SECURITY_GROUP, AWS_KEYPAIR_NAME, DIGITALOCEAN_API_TOKEN
-   - AWS_REGION="us-east-1"
-   - DEFAULT_SSH_USER="ubuntu"
-   - PACKER_GRAPHITE_BUILD_NAME="travis-packer"
-   - PACKER_GRAPHITE_EMAIL="ksclarke@gmail.com"
+  - AWS_REGION="us-east-1"
+  - DEFAULT_SSH_USER="ubuntu"
+  - PACKER_GRAPHITE_BUILD_NAME="travis-packer"
+  - PACKER_GRAPHITE_EMAIL="ksclarke@gmail.com"
+  - secure: "Z7lJ1YySdzV7l//dUbQ61fFaljoYPwkSY+D3WVz6Z1EL6fJhfEGW8q5UdSL9Fo9lQdOcvD5kJ1ypc8xlGk+H/o3KaK/9yWqVa7bRm120mFPjq1Bd/2m0ISiYfNLghJLnaE3KpfIoqTI4it+C/7DcMXOqbocGXr9piWOBp1MgF1s="
+  - secure: "hCQOixb9Qjn6ukpuSlRjPlZmXVGMf6mZfAX6OnvKRZtwQsXsDqS0K9OlPOmbhfzLH6E7EuiTn3UEBJjcFcfhE0Lihm+w4ijWruHWAPd+mH/Iyz+FKZtIvyuWzy2oEPTKXbah8/Yq2PK3hKXQvz6tsHzfjlVIRufRD97J1w3rFXc="
+  - secure: "JjYL0boUVj8AtM3dMbh+v4/Bgp8R2Gb+u0gCobRtQET76xrXwgLKsrXH643cIbg5H90g58I8a/21b3LLo1euNrjLfZqHl+mJolm+BPfQ9WSTouQJOxqinamSSf30+nPBYb+Z2o8n5gVK3AJa4jxGEYnJLTqVLmw2aLocDbVHXxo="
+  - secure: "bfbZvTnlsd9RwnBeksmNbyJZyXlXZxFkd4/BY9pI1M+wmwDXgBdjEKbgrBb3qYGSFuqEhXsOKEBDTB06CV61eQed+Hu7iXkDfQmyQrFjP4G0WBBkcY94EggtC055RRdESt5ORyRFwRtYi4buFSRP+Tg1E/Dhlo6MHpuxy7aZ2jI="
+  - secure: "NWARe+VRHn8vDQAZARctSws8gJouqLhfcZyPUKwS3XyBzJC9RY0eMFwP7V4/M7RvNeqesew2GJi+fxTRJbPF1zdoUUr/2PXY6NtVnZAukpvzRC7HnAG/w6jN19k5N1tOyCIxnjxHVXM/cn3KYd3Q5UIZSIjXi5xpbO5WCNW2u8M="
+  - secure: "SwVy7B5QxhR1bVNXg23uBuhDyRmG0RAAQH75Dyv/yvFY88F8CcZp3Y+9dxxPHOgaSnRv1dykxqTFKRjmLRgzF5lrCiSz2C+ah4cIkNnuFSIis1mp11cB1y2mcFixI++BNYT+ijfmRGtOI1owtbf+R9Nk/Oq/z/ONtgkoWnLAEj0="
+  - secure: "WEIJ2q4l6XgTIOtozBpMNpGdF9426MZVOTXN2TOIshEtRNFaaAYHiKzpJ1b+3pYRWy2TxXMIK+8XIUB6xbE4/T11jc2U45CdglFcwmZSBxmFzyfuTcGJp0VgG/VmuQuGehVPPwJC5sSlj1GMPfQf8UrmFHIX5UMaq0upRY1l2eM="
 
 before_install:
- - sudo apt-get update -y --fix-missing
+- sudo apt-get update -y --fix-missing
 
 install:
- # Install Packer.io so we can run the build
- - curl -o /tmp/packer.zip -L "https://dl.bintray.com/mitchellh/packer/packer_${PACKER_VERSION}_linux_amd64.zip"
- - sudo unzip -d /usr/local/bin /tmp/packer.zip
- # Install some basic testing dependencies
- - sudo apt-get -y install wget
- # Install dependencies for our project's build script
- - sudo apt-get -y install npm
- - if [ "$STRIP_COMMENTS" = true ]; then npm install --save strip-json-comments; fi
+- curl -o /tmp/packer.zip -L "https://dl.bintray.com/mitchellh/packer/packer_${PACKER_VERSION}_linux_amd64.zip"
+- sudo unzip -d /usr/local/bin /tmp/packer.zip
+- sudo apt-get -y install wget
+- sudo apt-get -y install npm
+- if [ "$STRIP_COMMENTS" = true ]; then npm install --save strip-json-comments; fi
 
 before_script:
- # Install the necessary pre-test AWS stuff, if needed
- - if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-before.sh; fi
- # Keep the project's build script happy by supplying a default config file
- - cp example-vars.json vars.json
+- if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-before.sh; fi
+- cp example-vars.json vars.json
 
 script:
- # Run the packer build script to create an AWS AMI
- - if [ "$PACKER_TEST" = "AWS" ]; then ./build.sh amazon-ebs; fi
+- if [ "$PACKER_TEST" = "AWS" ]; then ./build.sh amazon-ebs; fi
 
 after_script:
- - if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-after.sh; fi
- - aws ec2 revoke-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 2003 --cidr $(cat travis.ip)/32
- - rm -f ~/.aws/config
+- if [ "$PACKER_TEST" = "AWS" ]; then test-scripts/aws-after.sh; fi
+- aws ec2 revoke-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 2003 --cidr $(cat travis.ip)/32
+- rm -f ~/.aws/config
 
 notifications:
   email:
     recipients:
-      - ksclarke@gmail.com
+    - ksclarke@gmail.com
     on_failure: change
     on_success: change
   irc:
     channels:
-      - irc.freenode.org#freelibrary
+    - irc.freenode.org#freelibrary
     on_failure: always
     on_success: always
