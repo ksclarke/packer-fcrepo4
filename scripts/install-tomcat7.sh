@@ -8,7 +8,7 @@ TOMCAT_LOGS="/var/log/$TOMCAT_VERSION"
 TOMCAT_USER="$TOMCAT_VERSION"
 
 # This should fail when JDK 7 is end-of-life'd ... I think(?)
-sudo apt-get install -y openjdk-7-jdk $TOMCAT_VERSION
+sudo apt-get install -y $TOMCAT_VERSION
 
 # Set some environmental variables related to Tomcat and Java
 echo "export CATALINA_HOME=$TOMCAT_HOME" | sudo tee -a /etc/profile.d/tomcat.sh > /dev/null
@@ -16,7 +16,6 @@ echo "export CATALINA_USER=$TOMCAT_USER" | sudo tee -a /etc/profile.d/tomcat.sh 
 echo "export CATALINA_VERSION=$TOMCAT_VERSION" | sudo tee -a /etc/profile.d/tomcat.sh > /dev/null
 echo "export CATALINA_CONFIGS=$TOMCAT_CONFIG_DIR" | sudo tee -a /etc/profile.d/tomcat.sh > /dev/null
 echo "export CATALINA_TMPDIR=/tmp" | sudo tee -a /etc/profile.d/tomcat.sh > /dev/null
-echo "export JAVA_HOME=$(readlink -f /usr/bin/javac | sed 's:bin/javac::')" | sudo tee -a /etc/profile.d/java.sh  > /dev/null
 
 # Create our keystore for Tomcat so it can support HTTPS connections [TODO: support passing these in via file provisioner]
 KEYSTORE="$TOMCAT_CONFIG_DIR/keystore"

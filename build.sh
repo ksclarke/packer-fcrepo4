@@ -25,15 +25,26 @@ if [ ! -f vars.json ]; then
 fi
 
 function check_builder {
-  if [ "$1" == "amazon-ebs" ] || [ "$1" == "docker" ] || [ "$1" == "digitalocean" ]; then
+  if [ "$1" == "amazon" ] || [ "$1" == "docker" ] || [ "$1" == "digitalocean" ] || [ "$1" == "virtualbox" ]; then
+    case  "$1" in
+      amazon) BUILDER_NAME="amazon-ebs"
+        ;;
+      docker) BUILDER_NAME="docker"
+        ;;
+      digitalocean) BUILDER_NAME="digitalocean"
+        ;;
+      virtualbox) BUILDER_NAME="virtualbox-iso"
+        ;;
+    esac
+    
     if [[ "$BUILDER" != *only* ]]; then
-      BUILDER="-only=$1"
+      BUILDER="-only=$BUILDER_NAME"
     else
-      BUILDER="$BUILDER,$1"
+      BUILDER="$BUILDER,$BUILDER_NAME"
     fi
   else
     echo "  The requested Packer.io builder \"$1\" is not yet supported"
-    echo "   Supported builders: 'amazon-ebs', 'docker', and 'digitalocean'"
+    echo "   Supported builders: 'amazon', 'docker', 'virtualbox', and 'digitalocean'"
     exit 1
   fi
 }

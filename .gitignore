@@ -1,3 +1,5 @@
+# Local cache location
+packer_cache
 
 # The user configs supplied to the packer build
 vars*.json

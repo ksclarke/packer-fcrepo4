@@ -3,11 +3,12 @@
 # Start the basic system installation; put in a stupid loop to work around rare AWS-Ubuntu mirror issues
 for ATTEMPT in 1 2 3; do
   sudo apt-get update -y --fix-missing
-  sudo apt-get install -ym nano htop nmap wget unattended-upgrades
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -ym nano htop nmap wget unattended-upgrades
 
   if [ ! -z "`which nano`" ] && [ ! -z "`which htop`"  ] && [ ! -z "`which nmap`"  ] && [ ! -z "`which wget`"  ] \
       && [ ! -z "`which unattended-upgrade`" ]; then
-    sudo unattended-upgrade
+    echo "trying unattended-upgrade"
+    sudo DEBIAN_FRONTEND=noninteractive unattended-upgrade
     break
   fi
 done

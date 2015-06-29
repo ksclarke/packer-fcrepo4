@@ -13,8 +13,8 @@
 {
   "variables": {
     /* Below variables are hard-coded for this project */
-    "fcrepo4_version": "4.1.1",
-    "packer_fcrepo4_version": "0.1.2",
+    "fcrepo4_version": "4.2.0",
+    "packer_fcrepo4_version": "0.1.3",
     /* The build script will overwrite below var if building from a forked repo */
     "packer_project_repo": "http://github.com/ksclarke/packer-fcrepo4",
     /* Below builder variables should be supplied by the vars.json file */
@@ -47,7 +47,36 @@
     "keystore_password": ""
   },
   "builders": [
-    /* Two supported builders at this point: amazon-ebs and docker */
+    {
+      "type": "virtualbox-iso",
+      "guest_os_type": "Ubuntu_64",
+      "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04.2-server-amd64.iso",
+      "iso_checksum": "83aabd8dcf1e8f469f3c72fff2375195",
+      "iso_checksum_type": "md5",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "ssh_username": "ubuntu",
+      "ssh_password": "packer",
+      "ssh_wait_timeout": "480s",
+      "headless": true,
+      "http_directory" : "configs",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<esc><esc><enter><wait>",
+        "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-14.04-preseed.cfg <wait>",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us <wait>",
+        "hostname={{ .Name }} <wait>",
+        "fb=false debconf/frontend=noninteractive <wait>",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=us keyboard-configuration/variant=us console-setup/ask_detect=false <wait>",
+        "initrd=/install/initrd.gz -- <enter><wait>"
+      ],
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "1024"],
+        ["modifyvm", "{{.Name}}", "--vram", "128"],
+        ["modifyvm", "{{.Name}}", "--cpus", "1"]
+      ],
+      "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+    },
     {
       "type": "amazon-ebs",
       "access_key": "{{user `aws_access_key`}}",
@@ -80,7 +109,7 @@
     {
       "type": "digitalocean",
       "api_token": "{{user `digitalocean_api_token`}}",
-      /* Ubuntu's last LTS release, 14.04 */
+      /* Ubuntu's last Long Term Service (LTS) release */
       "image": "{{user `digitalocean_image`}}",
       "region": "{{user `digitalocean_region`}}",
       "size": "{{user `digitalocean_size`}}",
@@ -100,7 +129,7 @@
       "source": "scripts/fedora-metrics-server.sh",
       "destination": "/tmp/fedora-metrics-server.sh"
     },
-    {
+   {
       "type": "shell",
       "environment_vars": [
         "KEYSTORE_PASSWORD={{user `keystore_password`}}",
@@ -111,14 +140,21 @@
         "TOMCAT_PORT={{user `tomcat_port`}}",
         "TOMCAT_SSH_PORT={{user `tomcat_ssh_port`}}",
         "SERVER_HOST_NAME={{user `fcrepo4_server_host_name`}}",
-        "GRAPHITE_SERVER={{user `graphite_server_host_name`}}"
+        "GRAPHITE_SERVER={{user `graphite_server_host_name`}}",
+        "DEBIAN_FRONTEND=noninteractive"
       ],
       "scripts": [
         "scripts/setup-base-system.sh",
+        "scripts/install-java.sh",
         "scripts/install-tomcat7.sh",
         "scripts/install-fedora.sh",
         "scripts/configure-authbind.sh"
-      ]
+      ],
+      "override": {
+        "virtualbox-iso": {
+          "execute_command": "echo 'packer' | sudo -S sh '{{.Path}}'"
+        }
+      }
     },
     {
       "type": "shell",
@@ -128,12 +164,18 @@
         "SERVER_HOST_NAME={{user `fcrepo4_server_host_name`}}",
         "SERVER_ADMIN_EMAIL={{user `server_admin_email`}}",
         "AUTOMATIC_OS_SECURITY_UPDATES={{user `automatic_os_security_updates`}}",
-        "AUTOMATIC_OS_REBOOT={{user `automatic_os_reboot`}}"
+        "AUTOMATIC_OS_REBOOT={{user `automatic_os_reboot`}}",
+        "DEBIAN_FRONTEND=noninteractive"
       ],
       "scripts": [
         "scripts/modify-landscape.sh",
         "scripts/configure-base-system.sh"
-      ]
+      ],
+      "override": {
+        "virtualbox-iso": {
+          "execute_command": "echo 'packer' | sudo -S sh '{{.Path}}'"
+        }
+      }
     },
     {
       "type": "shell",
@@ -147,6 +189,11 @@
       "only": ["docker"],
       "repository": "{{user `docker_user`}}/packer-fcrepo4",
       "tag": "{{user `packer_fcrepo4_version`}}"
+    },
+    {
+      "type": "vagrant",
+      "only": ["virtualbox-iso"],
+      "output": "packer-fcrepo4-{{.Provider}}.box"
     }
   ]
 }
